@@ -3,6 +3,7 @@ PATH
   specs:
     chronicle-imessage (0.1.0)
       chronicle-etl (~> 0.2.4)
+      phonelib (~> 0.6.54)
       sqlite3 (~> 1.4.2)
 
 GEM
@@ -42,6 +43,7 @@ GEM
     numerizer (0.1.1)
     pastel (0.8.0)
       tty-color (~> 0.5)
+    phonelib (0.6.55)
     racc (1.6.0)
     rake (13.0.6)
     refinements (7.18.0)

@@ -37,10 +37,11 @@ module Chronicle
       def prepare_data
         @db = SQLite3::Database.new(@options[:db], results_as_hash: true)
         @messages = load_messages(
-          load_since: @options[:load_since], 
+          load_since: @options[:load_since],
           load_until: @options[:load_until],
           limit: @options[:limit]
         )
+        @contacts = LocalContacts.new.contacts
         @chats = load_chats
       end
 
@@ -56,8 +57,8 @@ module Chronicle
         conditions << "date < #{load_until_ios}" if load_until
         conditions << "date > #{load_since_ios}" if load_since
         sql += " WHERE #{conditions.join(" AND ")}" if conditions.any?
-        sql += " LIMIT #{limit}" if limit
         sql += " ORDER BY date DESC"
+        sql += " LIMIT #{limit}" if limit
 
         messages = @db.execute(sql)
       end
@@ -81,9 +82,10 @@ module Chronicle
 
       def match_contacts results
         results.map do |chat|
-          contact = @contacts.select{|contact| contact['number'] == chat['id']}.first
+          contact = @contacts[chat['id']]
           if contact
-            chat['full_name'] = "#{contact['first_name']} #{contact['last_name']}".strip.presence
+            full_name = "#{contact['first_name']} #{contact['last_name']}".strip
+            chat['full_name'] = full_name if full_name
           end
           chat
         end

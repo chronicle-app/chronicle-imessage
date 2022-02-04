@@ -44,12 +44,12 @@ module Chronicle
           @actor = me
           @consumers = @participants.collect{|p| build_identity(p)}
         else
-          @actor = build_identity(@message)
+          sender = @participants.select{|p| p['id'] == @message['id']}.first
+          receivers = @participants - [sender]
 
-          # take message sender out of participant list
-          consumers = @participants.reject{|p| p['id'] == @message['id']}
-          @consumers = consumers.collect{|p| build_identity(p)}
+          @consumers = receivers.collect{|p| build_identity(p)}
           @consumers << me
+          @actor = build_identity(sender)
         end
       end
 
@@ -84,6 +84,7 @@ module Chronicle
         record = ::Chronicle::ETL::Models::Entity.new({
           represents: 'identity',
           slug: identity['id'],
+          title: identity['full_name'],
           provider: identity_provider(@message['service']),
         })
         record.dedupe_on = [[:represents, :slug, :provider]]
@@ -94,6 +95,7 @@ module Chronicle
         record = ::Chronicle::ETL::Models::Entity.new({
           represents: 'identity',
           slug: @options[:my_phone_slug],
+          title: @options[:my_name],
           provider: identity_provider(@message['service']),
           provider_id: @message['account_guid']
         })
