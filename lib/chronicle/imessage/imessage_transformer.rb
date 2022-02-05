@@ -90,12 +90,14 @@ module Chronicle
 
         attachment_filename = attachment['filename'].gsub("~", Dir.home)
         attachment_data = ::Chronicle::ETL::Utils::BinaryAttachments.filename_to_base64(filename: attachment_filename, mimetype: attachment['mime_type'])
+        recognized_text = ::Chronicle::ETL::Utils::TextRecognition.recognize_in_image(filename: attachment_filename) if type == 'image'
 
         record = ::Chronicle::ETL::Models::Entity.new
         record.provider = 'imessage'
         record.provider_id = attachment['guid']
         record.represents = type
         record.title = File.basename(attachment['filename'])
+        record.metadata[:ocr_text] = recognized_text if recognized_text
         record.dedupe_on = [[:provider, :provider_id, :represents]]
 
         attachment = ::Chronicle::ETL::Models::Attachment.new
