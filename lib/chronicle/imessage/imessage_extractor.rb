@@ -11,6 +11,7 @@ module Chronicle
 
       DEFAULT_OPTIONS = {
         db: File.join(Dir.home, 'Library', 'Messages', 'chat.db'),
+        load_attachments: false,
         load_since: Time.now - 5000000
       }.freeze
 
@@ -22,7 +23,8 @@ module Chronicle
       def extract
         @messages.each do |message|
           meta = {
-            participants: @chats[message['chat_id']]
+            participants: @chats[message['chat_id']],
+            attachments: @attachments[message['message_id']]
           }
           yield Chronicle::ETL::Extraction.new(data: message, meta: meta)
         end
@@ -43,6 +45,10 @@ module Chronicle
         )
         @contacts = LocalContacts.new.contacts
         @chats = load_chats
+
+        if @options[:load_attachments]
+          @attachments = load_attachments(@messages.map{|m| m['message_id']})
+        end
       end
 
       def load_messages(load_since: nil, load_until: nil, limit: nil)
@@ -78,6 +84,21 @@ module Chronicle
 
         # group handles by id so we can pick right one easily
         chats = results.group_by{|x| x['chat_id']}
+      end
+
+      def load_attachments(message_ids)
+        sql = <<-SQL
+        SELECT
+          *
+        FROM
+          message_attachment_join
+          LEFT JOIN attachment ON attachment_id = attachment.rowid
+        WHERE
+          message_id IN(#{message_ids.join(",")})
+        SQL
+
+        results = @db.execute(sql)
+        results.group_by { |r| r['message_id'] }
       end
 
       def match_contacts results

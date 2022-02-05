@@ -1,5 +1,4 @@
 require 'chronicle/etl'
-require 'pry'
 
 module Chronicle
   module Imessage 
@@ -20,6 +19,7 @@ module Chronicle
       def transform
         @message = @extraction.data
         @participants = @extraction.meta[:participants]
+        @attachments = @extraction.meta[:attachments] || []
 
         set_actors
         record = build_messaged
@@ -76,6 +76,31 @@ module Chronicle
         record.dedupe_on = [[:represents, :provider, :provider_id]]
 
         record.consumers = @consumers
+        record.contains = @attachments.map{ |a| build_attachment(a)}.compact
+
+        record
+      end
+
+      def build_attachment(attachment)
+        return unless attachment['mime_type']
+
+        type, subtype = attachment['mime_type'].split("/")
+        return unless ['image', 'audio', 'video'].include?(type)
+        return unless attachment['filename']
+
+        attachment_filename = attachment['filename'].gsub("~", Dir.home)
+        attachment_data = ::Chronicle::ETL::Utils::BinaryAttachments.filename_to_base64(filename: attachment_filename, mimetype: attachment['mime_type'])
+
+        record = ::Chronicle::ETL::Models::Entity.new
+        record.provider = 'imessage'
+        record.provider_id = attachment['guid']
+        record.represents = type
+        record.title = File.basename(attachment['filename'])
+        record.dedupe_on = [[:provider, :provider_id, :represents]]
+
+        attachment = ::Chronicle::ETL::Models::Attachment.new
+        attachment.data = attachment_data
+        record.attachments = [attachment]
 
         record
       end
