@@ -1,5 +1,6 @@
 require 'chronicle/etl'
 require 'sqlite3'
+require 'pry'
 
 module Chronicle
   module Imessage 
@@ -22,10 +23,10 @@ module Chronicle
 
       def extract
         @messages.each do |message|
-          meta = {
-            participants: @chats[message['chat_id']],
-            attachments: @attachments[message['message_id']]
-          }
+          meta = {}
+          meta[:participants] = @chats[message['chat_id']]
+          meta[:attachments] = @attachments[message['message_id']] if @attachments
+
           yield Chronicle::ETL::Extraction.new(data: message, meta: meta)
         end
       end
