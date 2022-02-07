@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     chronicle-imessage (0.1.0)
-      chronicle-etl (~> 0.2.4)
+      chronicle-etl (~> 0.3)
       phonelib (~> 0.6.54)
       sqlite3 (~> 1.4.2)
 
@@ -16,7 +16,7 @@ GEM
       tzinfo (~> 2.0)
     chronic_duration (0.10.6)
       numerizer (~> 0.1.1)
-    chronicle-etl (0.2.4)
+    chronicle-etl (0.3.0)
       activesupport
       chronic_duration (~> 0.10.6)
       colorize (~> 0.8.1)
@@ -31,7 +31,7 @@ GEM
       tty-table (~> 0.11)
     colorize (0.8.1)
     concurrent-ruby (1.1.9)
-    i18n (1.8.11)
+    i18n (1.9.1)
       concurrent-ruby (~> 1.0)
     marcel (1.0.2)
     mini_exiftool (2.10.2)
@@ -50,7 +50,7 @@ GEM
     runcom (6.6.0)
       refinements (~> 7.16)
       xdg (~> 4.4)
-    sequel (5.52.0)
+    sequel (5.53.0)
     sqlite3 (1.4.2)
     strings (0.2.1)
       strings-ansi (~> 0.2)
