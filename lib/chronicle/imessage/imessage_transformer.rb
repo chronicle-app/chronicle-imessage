@@ -89,6 +89,8 @@ module Chronicle
         return unless attachment['filename']
 
         attachment_filename = attachment['filename'].gsub("~", Dir.home)
+        return unless File.exist?(attachment_filename)
+
         attachment_data = ::Chronicle::ETL::Utils::BinaryAttachments.filename_to_base64(filename: attachment_filename, mimetype: attachment['mime_type'])
         recognized_text = ::Chronicle::ETL::Utils::TextRecognition.recognize_in_image(filename: attachment_filename) if type == 'image'
 
@@ -108,6 +110,8 @@ module Chronicle
       end
 
       def build_identity identity
+        raise ::Chronicle::ETL::UntransformableRecordError.new("Could not build identity", transformation: self) unless identity
+
         record = ::Chronicle::ETL::Models::Entity.new({
           represents: 'identity',
           slug: identity['id'],
