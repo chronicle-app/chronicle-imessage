@@ -8,13 +8,8 @@ module Chronicle
         r.description = 'a row from a local imessage database'
       end
 
-      DEFAULT_OPTIONS = {
-      }.freeze
-
-      def initialize(*args)
-        super(*args)
-        @options = @options.reverse_merge(DEFAULT_OPTIONS)
-      end
+      setting :my_phone_slug, required: true
+      setting :my_name, required: true
 
       def transform
         @message = @extraction.data
@@ -125,8 +120,8 @@ module Chronicle
       def build_identity_mine
         record = ::Chronicle::ETL::Models::Entity.new({
           represents: 'identity',
-          slug: @options[:my_phone_slug],
-          title: @options[:my_name],
+          slug: @config.my_phone_slug,
+          title: @config.my_name,
           provider: identity_provider(@message['service']),
           provider_id: @message['account_guid']
         })

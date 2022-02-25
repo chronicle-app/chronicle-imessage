@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "chronicle-etl", "~> 0.3"
+  spec.add_dependency "chronicle-etl", "~> 0.4"
   spec.add_dependency "sqlite3", "~> 1.4.2"
   spec.add_dependency "phonelib", "~> 0.6.54"
 

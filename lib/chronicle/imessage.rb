@@ -5,7 +5,5 @@ require "chronicle/imessage/local_contacts"
 
 module Chronicle
   module Imessage
-    class Error < StandardError; end
-    # Your code goes here...
   end
 end

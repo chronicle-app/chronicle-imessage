@@ -10,14 +10,11 @@ module Chronicle
         r.description = 'a local imessage database'
       end
 
-      DEFAULT_OPTIONS = {
-        db: File.join(Dir.home, 'Library', 'Messages', 'chat.db'),
-        load_attachments: false,
-        load_since: Time.now - 5000000
-      }.freeze
+      setting :db, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true
+      setting :load_attachments, default: false
+      setting :only_attachments, default: false
 
-      def initialize(options = {})
-        super(DEFAULT_OPTIONS.merge(options))
+      def prepare
         prepare_data
       end
 
@@ -38,34 +35,40 @@ module Chronicle
       private
 
       def prepare_data
-        @db = SQLite3::Database.new(@options[:db], results_as_hash: true)
-        @messages = load_messages(
-          load_since: @options[:load_since],
-          load_until: @options[:load_until],
-          limit: @options[:limit]
-        )
+        @db = SQLite3::Database.new(@config.db, results_as_hash: true)
+        @messages = load_messages
         @contacts = LocalContacts.new.contacts
         @chats = load_chats
 
-        if @options[:load_attachments]
+        if @config.load_attachments
           @attachments = load_attachments(@messages.map{|m| m['message_id']})
         end
       end
 
-      def load_messages(load_since: nil, load_until: nil, limit: nil)
-        load_since_ios = unix_to_ios_timestamp(load_since.to_i) * 1000000000 if load_since
-        load_until_ios = unix_to_ios_timestamp(load_until.to_i) * 1000000000 if load_until
+      def load_messages
+        conditions = []
+
+        if @config.until
+          load_until_ios = unix_to_ios_timestamp(@config.until.to_i) * 1000000000
+          conditions << "date < #{load_until_ios}"
+        end
+
+        if @config.since
+          load_since_ios = unix_to_ios_timestamp(@config.since.to_i) * 1000000000
+          conditions << "date > #{load_since_ios}"
+        end
+
+        if @config.only_attachments
+          conditions << "cache_has_attachments = true"
+        end
 
         sql = "SELECT * from message as m
           LEFT OUTER JOIN handle as h ON m.handle_id=h.ROWID
           INNER JOIN chat_message_join as cm ON m.ROWID = cm.message_id"
 
-        conditions = []
-        conditions << "date < #{load_until_ios}" if load_until
-        conditions << "date > #{load_since_ios}" if load_since
         sql += " WHERE #{conditions.join(" AND ")}" if conditions.any?
         sql += " ORDER BY date DESC"
-        sql += " LIMIT #{limit}" if limit
+        sql += " LIMIT #{@config.limit}" if @config.limit
 
         messages = @db.execute(sql)
       end
