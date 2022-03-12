@@ -43,10 +43,12 @@ module Chronicle
 
       def prepare_data
         @db = SQLite3::Database.new(@config.db, results_as_hash: true)
+        @local_contacts = LocalContacts.new
+        @contacts = @local_contacts.contacts
+
         @messages = load_messages
         @chats = load_chats
 
-        @local_contacts = LocalContacts.new
         @my_phone_contact = load_my_phone_contact(@local_contacts)
         @my_icloud_account = load_my_icloud_account(@local_contacts)
 
