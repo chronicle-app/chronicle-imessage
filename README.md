@@ -13,7 +13,6 @@ IMessage importer for [chronicle-etl](https://github.com/chronicle-app/chronicle
 
 ```bash
 gem install chronicle-etl
-chronicle-etl connectors:install imessage
-
-chronicle-etl --extractor imessage --since:"2022-02-07" --transformer imessage --loader table
+chronicle-etl plugins:install imessage
+chronicle-etl --extractor imessage --since "2022-02-07" --transformer imessage
 ```

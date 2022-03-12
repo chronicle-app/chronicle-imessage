@@ -23,11 +23,51 @@ module Chronicle
         end
       end
 
+      def my_phone_contact
+        @my_phone_contact ||= load_my_phone_contact
+      end
+
+      def my_icloud_account
+        @my_icloud_account ||= load_my_icloud_account
+      end
+
       # The synced address book doesn't have a stable folder location so we 
       # have to search for it
       def find_local_icloud_address_book
         pattern = File.join(Dir.home, '/Library/Application Support/AddressBook/Sources', '**/*.abcddb')
         Dir.glob(pattern).first
+      end
+
+      def load_my_icloud_account
+        @my_icloud_account || begin
+          output = `defaults read MobileMeAccounts Accounts | plutil -convert json -r -o - -- -`
+          JSON.parse(output, symbolize_names: true).first
+        end
+      end
+
+      def load_my_phone_contact
+        sql = <<-SQL
+          SELECT
+            ZABCDPHONENUMBER.ZFULLNUMBER AS identifier,
+            ZABCDRECORD.ZFIRSTNAME as first_name,
+            ZABCDRECORD.ZLASTNAME as last_name
+          FROM
+            ZABCDRECORD,
+            ZABCDPHONENUMBER 
+          WHERE
+            ZABCDRECORD.Z_PK = ZABCDPHONENUMBER.ZOWNER  
+            AND ZABCDRECORD.zcontainerwherecontactisme IS NOT NULL 
+        SQL
+
+        results = @db.execute(sql)
+
+        guessed_number = results.first
+        return unless guessed_number
+
+        {
+          phone_number: Phonelib.parse(guessed_number['identifier'], "US").e164,
+          full_name: "#{guessed_number['first_name']} #{guessed_number['last_name']}"
+        }
       end
 
       def load_phone_numbers

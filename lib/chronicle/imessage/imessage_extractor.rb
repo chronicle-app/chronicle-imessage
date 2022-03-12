@@ -13,6 +13,11 @@ module Chronicle
       setting :db, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true
       setting :load_attachments, default: false
       setting :only_attachments, default: false
+      setting :my_phone_number
+      setting :my_name
+      setting :icloud_account_id
+      setting :icloud_account_dsid
+      setting :icloud_account_display_name
 
       def prepare
         prepare_data
@@ -23,6 +28,8 @@ module Chronicle
           meta = {}
           meta[:participants] = @chats[message['chat_id']]
           meta[:attachments] = @attachments[message['message_id']] if @attachments
+          meta[:my_phone_contact] = @my_phone_contact
+          meta[:my_icloud_account] = @my_icloud_account
 
           yield Chronicle::ETL::Extraction.new(data: message, meta: meta)
         end
@@ -37,12 +44,30 @@ module Chronicle
       def prepare_data
         @db = SQLite3::Database.new(@config.db, results_as_hash: true)
         @messages = load_messages
-        @contacts = LocalContacts.new.contacts
         @chats = load_chats
+
+        @local_contacts = LocalContacts.new
+        @my_phone_contact = load_my_phone_contact(@local_contacts)
+        @my_icloud_account = load_my_icloud_account(@local_contacts)
 
         if @config.load_attachments
           @attachments = load_attachments(@messages.map{|m| m['message_id']})
         end
+      end
+
+      def load_my_phone_contact(local_contacts)
+        {
+          phone_number: @config.my_phone_number || local_contacts.my_phone_contact.fetch(:phone_number),
+          name: @config.my_name || local_contacts.my_phone_contact.fetch(:full_name)
+        }
+      end
+
+      def load_my_icloud_account(local_contacts)
+        {
+          id: @config.icloud_account_id || local_contacts.my_icloud_account.fetch(:AccountID),
+          dsid: @config.icloud_account_dsid || local_contacts.my_icloud_account.fetch(:AccountDSID),
+          display_name: @config.icloud_account_display_name || @config.my_name || local_contacts.my_icloud_account.fetch(:DisplayName)
+        }
       end
 
       def load_messages

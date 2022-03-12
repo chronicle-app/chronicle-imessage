@@ -8,9 +8,6 @@ module Chronicle
         r.description = 'a row from a local imessage database'
       end
 
-      setting :my_phone_slug, required: true
-      setting :my_name, required: true
-
       def transform
         @message = @extraction.data
         @participants = @extraction.meta[:participants]
@@ -118,14 +115,40 @@ module Chronicle
       end
 
       def build_identity_mine
+        case identity_provider(@message['service'])
+        when 'icloud'
+          build_identity_mine_icloud
+        when 'phone'
+          build_identity_mine_phone
+        end
+      end
+
+      def build_identity_mine_icloud
+        icloud_account = @extraction.meta[:my_icloud_account]
+        raise(UntransformableRecordError, "Missing iCloud account information") unless icloud_account
+
         record = ::Chronicle::ETL::Models::Entity.new({
-          represents: 'identity',
-          slug: @config.my_phone_slug,
-          title: @config.my_name,
-          provider: identity_provider(@message['service']),
-          provider_id: @message['account_guid']
+          represent: 'identity',
+          provider: 'icloud',
+          provider_id: icloud_account[:dsid],
+          title: icloud_account[:display_name],
+          slug: icloud_account[:id]
         })
-        record.dedupe_on = [[:represents, :slug, :provider], [:represents, :provider, :provider_id]]
+        record.dedupe_on << [:provider, :represents, :slug]
+        record
+      end
+
+      def build_identity_mine_phone
+        phone_account = @extraction.meta[:my_phone_contact]
+        raise(UntransformableRecordError, "Missing own phone contact information") unless phone_account
+
+        record = ::Chronicle::ETL::Models::Entity.new({
+          represent: 'identity',
+          provider: 'phone',
+          title: phone_account[:name],
+          slug: phone_account[:phone_number]
+        })
+        record.dedupe_on << [:provider, :represents, :slug]
         record
       end
 
