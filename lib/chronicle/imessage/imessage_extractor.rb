@@ -1,6 +1,5 @@
 require 'chronicle/etl'
 require 'sqlite3'
-require 'pry'
 
 module Chronicle
   module Imessage 
