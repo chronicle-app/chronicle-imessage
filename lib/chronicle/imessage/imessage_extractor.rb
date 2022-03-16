@@ -27,8 +27,8 @@ module Chronicle
           meta = {}
           meta[:participants] = @chats[message['chat_id']]
           meta[:attachments] = @attachments[message['message_id']] if @attachments
-          meta[:my_phone_contact] = @my_phone_contact
-          meta[:my_icloud_account] = @my_icloud_account
+          meta[:my_phone_contact] = @my_phone_contact if @my_phone_contact.values.all?
+          meta[:my_icloud_account] = @my_icloud_account if @my_icloud_account.values.all?
 
           yield Chronicle::ETL::Extraction.new(data: message, meta: meta)
         end
@@ -58,16 +58,16 @@ module Chronicle
 
       def load_my_phone_contact(local_contacts)
         {
-          phone_number: @config.my_phone_number || local_contacts.my_phone_contact.fetch(:phone_number),
-          name: @config.my_name || local_contacts.my_phone_contact.fetch(:full_name)
+          phone_number: @config.my_phone_number || local_contacts.my_phone_contact&.fetch(:phone_number),
+          name: @config.my_name || local_contacts.my_phone_contact&.fetch(:full_name)
         }
       end
 
       def load_my_icloud_account(local_contacts)
         {
-          id: @config.icloud_account_id || local_contacts.my_icloud_account.fetch(:AccountID),
-          dsid: @config.icloud_account_dsid || local_contacts.my_icloud_account.fetch(:AccountDSID),
-          display_name: @config.icloud_account_display_name || @config.my_name || local_contacts.my_icloud_account.fetch(:DisplayName)
+          id: nil,
+          dsid: @config.icloud_account_dsid || local_contacts.my_icloud_account&.fetch(:AccountDSID),
+          display_name: @config.icloud_account_display_name || @config.my_name || local_contacts.my_icloud_account&.fetch(:DisplayName)
         }
       end
 

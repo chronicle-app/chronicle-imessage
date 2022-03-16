@@ -31,6 +31,8 @@ module Chronicle
         @my_icloud_account ||= load_my_icloud_account
       end
 
+      private
+
       # The synced address book doesn't have a stable folder location so we 
       # have to search for it
       def find_local_icloud_address_book

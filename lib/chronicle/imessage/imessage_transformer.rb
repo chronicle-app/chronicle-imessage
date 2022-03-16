@@ -102,7 +102,7 @@ module Chronicle
       end
 
       def build_identity identity
-        raise ::Chronicle::ETL::UntransformableRecordError.new("Could not build identity", transformation: self) unless identity
+        raise(Chronicle::ETL::UntransformableRecordError, "Could not build record due to missing identity data") unless identity
 
         record = ::Chronicle::ETL::Models::Entity.new({
           represents: 'identity',
@@ -125,7 +125,7 @@ module Chronicle
 
       def build_identity_mine_icloud
         icloud_account = @extraction.meta[:my_icloud_account]
-        raise(UntransformableRecordError, "Missing iCloud account information") unless icloud_account
+        raise(Chronicle::ETL::UntransformableRecordError, "Could not build record due to missing iCloud details. Please provide them through the extractor settings.") unless icloud_account
 
         record = ::Chronicle::ETL::Models::Entity.new({
           represent: 'identity',
@@ -140,7 +140,7 @@ module Chronicle
 
       def build_identity_mine_phone
         phone_account = @extraction.meta[:my_phone_contact]
-        raise(UntransformableRecordError, "Missing own phone contact information") unless phone_account
+        raise(Chronicle::ETL::UntransformableRecordError, "Could not build record due to missing phone details. Please provide them through the extractor settings.") unless phone_account
 
         record = ::Chronicle::ETL::Models::Entity.new({
           represent: 'identity',
