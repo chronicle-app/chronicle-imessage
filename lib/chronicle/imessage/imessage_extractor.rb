@@ -65,7 +65,7 @@ module Chronicle
 
       def load_my_icloud_account(local_contacts)
         {
-          id: nil,
+          id: @config.icloud_account_id || local_contacts.my_icloud_account&.fetch(:AccountID),
           dsid: @config.icloud_account_dsid || local_contacts.my_icloud_account&.fetch(:AccountDSID),
           display_name: @config.icloud_account_display_name || @config.my_name || local_contacts.my_icloud_account&.fetch(:DisplayName)
         }
