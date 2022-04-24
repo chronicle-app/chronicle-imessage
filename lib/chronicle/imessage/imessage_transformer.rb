@@ -6,6 +6,7 @@ module Chronicle
       register_connector do |r|
         r.provider = 'imessage'
         r.description = 'a row from a local imessage database'
+        r.identifier = 'message'
       end
 
       def transform

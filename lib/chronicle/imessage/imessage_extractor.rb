@@ -7,6 +7,7 @@ module Chronicle
       register_connector do |r|
         r.provider = 'imessage'
         r.description = 'a local imessage database'
+        r.identifier = 'messages'
       end
 
       setting :db, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true

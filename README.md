@@ -23,7 +23,7 @@ $ chronicle-etl -e imessage --loader csv --limit 10 -o imessages.csv
 ## Available Connectors
 ### Extractors
 
-#### `imessage`
+#### `messages`
 Extractor for importing messages and attachments from local macOS iMessage install (`~/Library/Messages/chat.db`)
 
 ##### Settings
@@ -38,5 +38,5 @@ We want messages to have sender/receiver information set properly so we try to i
   - Can find in Keychain or by running `$ defaults read MobileMeAccounts Accounts`
 ### Transformers
 
-#### `imessage`
+#### `message`
 Transform an iMessage message into Chronicle Schema
