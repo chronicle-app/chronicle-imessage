@@ -10,7 +10,7 @@ module Chronicle
         r.identifier = 'messages'
       end
 
-      setting :db, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true
+      setting :input, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true
       setting :load_attachments, default: false
       setting :only_attachments, default: false
       setting :my_phone_number
@@ -41,8 +41,12 @@ module Chronicle
 
       private
 
+      def db_file
+        [@config.input].flatten.first
+      end
+
       def prepare_data
-        @db = SQLite3::Database.new(@config.db, results_as_hash: true)
+        @db = SQLite3::Database.new(db_file, results_as_hash: true)
         @local_contacts = LocalContacts.new
         @contacts = @local_contacts.contacts
 

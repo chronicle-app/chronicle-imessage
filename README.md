@@ -27,6 +27,7 @@ $ chronicle-etl -e imessage --loader csv --limit 10 -o imessages.csv
 Extractor for importing messages and attachments from local macOS iMessage install (`~/Library/Messages/chat.db`)
 
 ##### Settings
+- `input`: (default: ~/Library/Messages/chat.db) Local iMessage sqlite database
 - `load_attachments`: (default: false) Whether to load message attachments
 - `only_attachments`: (default: false) Whether to load only messages with attachments
 
