@@ -129,7 +129,7 @@ module Chronicle
         raise(Chronicle::ETL::UntransformableRecordError, "Could not build record due to missing iCloud details. Please provide them through the extractor settings.") unless icloud_account
 
         record = ::Chronicle::ETL::Models::Entity.new({
-          represent: 'identity',
+          represents: 'identity',
           provider: 'icloud',
           provider_id: icloud_account[:dsid],
           title: icloud_account[:display_name],
