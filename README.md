@@ -10,21 +10,18 @@ Access your iMessage messages and attachments using the command line with this p
 $ gem install chronicle-etl
 $ chronicle-etl plugins:install imessage
 
-# Load messages since February 7
-$ chronicle-etl --extractor imessage --transformer imessage --since "2022-02-07"
+# Load messages from the last week
+$ chronicle-etl --extractor imessage --schema chronicle --since 1w
 
 # Of the latest 1000 messages received, who were the top senders?
-$ chronicle-etl -e imessage -t imessage --limit 1000 --no-header-row --fields actor.title | sort | uniq -c | sort -nr
-
-# Get the raw query results for the latest 10 messages and save as a CSV
-$ chronicle-etl -e imessage --loader csv --limit 10 -o imessages.csv
+$ chronicle-etl -e imessage --schema chronicle --limit 1000 --fields agent.name | sort | uniq -c | sort -nr
 ```
 
 ## Available Connectors
 ### Extractors
 
-#### `messages`
-Extractor for importing messages and attachments from local macOS iMessage install (`~/Library/Messages/chat.db`)
+#### `message`
+Extractor for importing messages and attachments from local macOS iMessage install (via local cache at `~/Library/Messages/chat.db`)
 
 ##### Settings
 - `input`: (default: ~/Library/Messages/chat.db) Local iMessage sqlite database
@@ -37,7 +34,3 @@ We want messages to have sender/receiver information set properly so we try to i
 - `icloud_account_id`: Specify an email address that represents your iCloud account ID
 - `icloud_account_dsid`: Specify iCloud DSID
   - Can find in Keychain or by running `$ defaults read MobileMeAccounts Accounts`
-### Transformers
-
-#### `message`
-Transform an iMessage message into Chronicle Schema

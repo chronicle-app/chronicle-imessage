@@ -5,9 +5,10 @@ module Chronicle
   module Imessage 
     class ImessageExtractor < Chronicle::ETL::Extractor
       register_connector do |r|
-        r.provider = 'imessage'
+        r.source = :imessage
+        r.type = :message
+        r.strategy = :local_db
         r.description = 'a local imessage database'
-        r.identifier = 'messages'
       end
 
       setting :input, default: File.join(Dir.home, 'Library', 'Messages', 'chat.db'), required: true
@@ -31,7 +32,7 @@ module Chronicle
           meta[:my_phone_contact] = @my_phone_contact if @my_phone_contact.values.all?
           meta[:my_icloud_account] = @my_icloud_account if @my_icloud_account.values.all?
 
-          yield Chronicle::ETL::Extraction.new(data: message, meta: meta)
+          yield build_extraction(data: message, meta:)
         end
       end
 

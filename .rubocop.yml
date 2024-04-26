@@ -1,0 +1,2 @@
+inherit_gem:
+  chronicle-core: .rubocop-plugin.yml
